@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -x
+export DEBIAN_FRONTEND=noninteractive
+
+git config --global user.email "root@localhost"
+git config --global user.name "root"
+
+## packages sorted alphabeticaly
+##
+packages=""
+packages="${packages} apt-transport-https"
+packages="${packages} libsasl2-modules"
+packages="${packages} postfix"
+packages="${packages} rsyslog"
+
+## install packages
+##
+apt-get install -y --no-install-recommends --auto-remove --purge ${packages}
+
+## postfix
+##
+mkdir -p /etc/service/postfix
+install -m 755 -o root -g root -p /root/build/etc/service/postfix/run /etc/service/postfix/run
+
+## rsyslog
+##
+install -m 644 -o root -g root -p /root/build/etc/rsyslog.conf /etc/rsyslog.conf
+mkdir -p /etc/service/rsyslog
+install -m 755 -o root -g root -p /root/build/etc/service/rsyslog/run /etc/service/rsyslog/run

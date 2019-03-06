@@ -1,0 +1,53 @@
+#!/bin/bash
+exec 1>&2
+
+/usr/bin/sv start rsyslog || exit 1
+
+POSTFIX_myhostname=${POSTFIX_myhostname:=localhost}
+POSTFIX_mydestination=${POSTFIX_mydestination:=localhost}
+POSTFIX_mynetworks=${POSTFIX_mynetworks:=0.0.0.0/0}
+POSTFIX_smtp_tls_security_level=${POSTFIX_smtp_tls_security_level:=may}
+POSTFIX_smtpd_tls_security_level=${POSTFIX_smtpd_tls_security_level:=none}
+
+# POSTFIX_var => postconf -e var=$POSTFIX_var
+for e in ${!POSTFIX_*}; do
+  postconf -e "${e:8}=${!e}"
+done
+
+export MAIL_LOGTAG=postfix
+export non_interactive=1
+export command_directory=/usr/sbin
+export config_directory=/etc/postfix
+export daemon_directory=/usr/lib/postfix/sbin
+export data_directory=/var/lib/postfix
+export html_directory=/usr/share/doc/postfix/html
+export mail_owner=postfix
+export mail_version=none-of-your-business
+export mailq_path=/usr/bin/mailq
+export manpage_directory=/usr/share/man
+export meta_directory=/etc/postfix
+export newaliases_path=/usr/bin/newaliases
+export queue_directory=/var/spool/postfix
+export readme_directory=no
+export sample_directory=/etc/postfix
+export sendmail_path=/usr/sbin/sendmail
+export setgid_group=postdrop
+export shlib_directory=/usr/lib/postfix
+
+/usr/lib/postfix/configure-instance.sh - || exit 1
+/etc/postfix/postfix-script check || exit 1
+
+chown postfix:postfix /var/lib/postfix/.
+chmod 750 /var/lib/postfix/.
+
+chown root:mail /var/mail/.
+chmod 2770 /var/mail/.
+
+chown root:root /var/spool/postfix/.
+chmod 755 /var/spool/postfix/.
+
+#chown -R postfix:postfix /var/lib/postfix /var/mail /var/spool/postfix
+#chown root /var/spool/postfix/. /var/spool/postfix/pid
+#chgrp postdrop /var/spool/postfix/public /var/spool/postfix/maildrop
+
+exec /usr/lib/postfix/sbin/master -d
