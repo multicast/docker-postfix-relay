@@ -1,5 +1,5 @@
 NAMESPACE = mkovac
-NAME = mkovac/postfix
+NAME = mkovac/postfix-relay
 VERSION = $(shell date +%Y%m%d)
 
 .PHONY: all
