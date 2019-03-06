@@ -1,11 +1,12 @@
-# postfix
+# postfix-relay
 
-![Pulls](https://img.shields.io/docker/pulls/mkovac/postfix.svg)
-![Stars](https://img.shields.io/docker/stars/mkovac/postfix.svg)
+![Pulls](https://img.shields.io/docker/pulls/mkovac/postfix-relay.svg)
+![Stars](https://img.shields.io/docker/stars/mkovac/postfix-relay.svg)
 
 The container image running `[postfix](https://postfix.org/)`
 based on [Debian Stretch](https://wiki.debian.org/DebianStretch)
-[image](https://hub.docker.com/r/mkovac/runit-stretch/).
+[image](https://hub.docker.com/r/mkovac/runit-stretch/). It is supposed to
+be used as a smart relay.
 
 # Packages
 
