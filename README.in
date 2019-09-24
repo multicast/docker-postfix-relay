@@ -10,3 +10,28 @@ be used as a smart relay.
 
 # Packages
 
+# =IMAGE=
+
+![Pulls](https://img.shields.io/docker/pulls/=NAMESPACE=/=IMAGE=.svg)
+![Stars](https://img.shields.io/docker/stars/=NAMESPACE=/=IMAGE=.svg)
+
+The [Debian](https://debian.org/) [Buster](https://wiki.debian.org/DebianBuster)
+[Postfix](https://postfix.org/) [container image](https://hub.docker.com/r/mkovac/postfix-relay/).
+It is supposed to be used as a smart relay.
+
+This image is built daily and in case of any security update, the list of
+packages is updated, commited and this triggers update of docker-hub image
+and all dependant images.
+
+## Quick Usage
+
+Run prebuilt and explore:
+
+    $ docker run --rm -ti =NAMESPACE=/=IMAGE= bash
+
+Typically you want to provide some variables to be changed in `postfix`
+configuration. For this, use `--env POSTFIX_var="value"` and the runit
+startup script will execute `postconv -e <varname>="$POSTFIX_<varname>"`.
+
+# Packages
+

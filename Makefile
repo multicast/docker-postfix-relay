@@ -1,5 +1,11 @@
+
+-include ../Docker.mak
+
+ifndef NAMESPACE
 NAMESPACE = mkovac
-NAME = mkovac/postfix-relay
+endif
+IMAGE := $(shell basename $(shell readlink -e . ) )
+NAME = ${NAMESPACE}/${IMAGE}
 VERSION = $(shell date +%Y%m%d)
 
 .PHONY: all
@@ -15,21 +21,34 @@ build:
 	 --build-arg "http_proxy=${http_proxy}" \
 	 --build-arg "https_proxy=${https_proxy}" \
 	 .
-	docker run --rm $(NAME):$(VERSION) dpkg -l > dpkg-new.txt
+	docker image rm $(NAME):latest || true
+	docker tag $(NAME):$(VERSION) $(NAME):latest
 
 .PHONY: latest
 latest: build
-	docker tag $(NAME):$(VERSION) $(NAME):latest
+	docker run --rm $(NAME):$(VERSION) dpkg -l > dpkg-new.txt
 	diff dpkg-new.txt dpkg.txt 2>&1 >/dev/null && { \
 	  docker image rm $(NAME):$(VERSION); \
 	} || { \
-	  ( sed -e s/=NAMESPACE=/${NAMESPACE}/g README.in; \
+	  ( sed -e s/=NAMESPACE=/${NAMESPACE}/g \
+	        -e s/=IMAGE=/${IMAGE}/g README.in; \
 	    sed -e 's/^/    /' dpkg-new.txt ) > README.md; \
 	  git add README.md; \
-          git commit -nm "package updates on  ${VERSION}"; \
-          git push; \
-        }
+	  git commit -nm "package updates on  ${VERSION}"; \
+	  git push; \
+	  cp dpkg-new.txt dpkg.txt; \
+	}
+	rm -f dpkg-new.txt
 
 .PHONY: push
 push: latest
 	docker push $(NAME):latest
+
+.PHONY: daily
+daily:
+	count="$(shell docker run --rm ${NAME} bash -c "apt-get update -q -q && apt list -q -q --upgradable 2>/dev/null | wc -l")" && \
+	 test $$count -eq 0 || make latest
+
+.PHONY: show-updates
+show-updates:
+	docker run --rm -ti ${NAME} bash -c "apt-get update -q -q && apt list -q -q --upgradable"
